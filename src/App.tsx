@@ -1113,7 +1113,7 @@ export default function App() {
                   <>
                     <div>
                       <div className="text-cyber-blue text-[10px] uppercase tracking-widest mb-3 border-b border-cyber-blue/20 pb-2 inline-block font-mono font-semibold">
-                        🧬 Codex Alignment Telemetry
+                        Codex Alignment Telemetry
                       </div>
                       
                       <div className="space-y-4">
@@ -1232,7 +1232,7 @@ export default function App() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
             <div>
               <h2 className="font-display text-2xl font-black uppercase tracking-[3px] text-white">
-                🗂️ THE GLYPH CODEX
+                THE GLYPH CODEX
               </h2>
               <p className="text-xs text-ash mt-1 leading-relaxed">
                 Explore thirty living logographic ideograms, organized by traditional domains of significance. Use the switcher inside cards to trace vector lines or view AI 3D Holograms.
