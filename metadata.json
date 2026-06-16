@@ -1,0 +1,6 @@
+{
+  "name": "Nsibidi Codex & Name Oracle",
+  "description": "An authentic educational directory of thirty sacred Nsibidi ideograms (West African writing system) alongside an AI-powered Name Oracle that translates name etymologies and crafts unique custom vector sigils.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

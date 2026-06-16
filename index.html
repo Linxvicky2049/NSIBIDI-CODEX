@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nsibidi Sacred Codex & Name Oracle</title>
+    <!-- Premium West African and Historic Typography Pairings -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel&family=Cinzel+Decorative:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Environment Safeguard: Mitigate external browser extension failures (e.g., MetaMask and associated content script exceptions) -->
+    <script>
+      (function() {
+        var suppressPatterns = [
+          /metamask/i,
+          /^uncaught typeerror: t is not a function/i,
+          /t is not a function/i,
+          /failed to connect to metamask/i,
+          /ethereum/i
+        ];
+        function matchSuppress(msg) {
+          if (!msg) return false;
+          var s = String(msg).toLowerCase();
+          return suppressPatterns.some(function(pattern) {
+            return pattern.test(s);
+          });
+        }
+        window.addEventListener('error', function(e) {
+          var msg = e.message || (e.error && e.error.message);
+          if (matchSuppress(msg)) {
+            e.stopImmediatePropagation();
+            e.preventDefault();
+            return true;
+          }
+        }, true);
+        window.addEventListener('unhandledrejection', function(e) {
+          var msg = e.reason ? (e.reason.message || String(e.reason)) : null;
+          if (matchSuppress(msg)) {
+            e.stopImmediatePropagation();
+            e.preventDefault();
+            return true;
+          }
+        }, true);
+      })();
+    </script>
+  </head>
+  <body class="bg-[#0B0805] text-[#F0E8D0] selection:bg-[#C8860A]/30 selection:text-[#E6B84A]">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

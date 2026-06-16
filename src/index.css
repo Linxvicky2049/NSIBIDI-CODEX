@@ -1,0 +1,231 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-display: "Cinzel Decorative", serif;
+  --font-cinzel: "Cinzel", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-ink: #050403;
+  --color-card: rgba(12, 10, 15, 0.45);
+  --color-card2: rgba(22, 15, 30, 0.55);
+  --color-ochre: #00f0ff;
+  --color-gold: #ff00ab;
+  --color-bone: #f5f0e1;
+  --color-ash: #9ba4b5;
+  
+  --color-cyber-blue: #00f0ff;
+  --color-cyber-magenta: #ff0055;
+  --color-cyber-violet: #bc00dd;
+}
+
+/* Custom background paper grid overlay and animation styles */
+@layer utilities {
+  .sacred-grid {
+    background-image: 
+      linear-gradient(90deg, transparent 99%, rgba(0, 240, 255, 0.04) 99%),
+      linear-gradient(0deg, transparent 99%, rgba(0, 240, 255, 0.04) 99%);
+    background-size: 50px 50px;
+  }
+  
+  .hologram-mesh {
+    background: radial-gradient(circle at 50% 50%, rgba(12, 8, 24, 0.8) 0%, rgba(3, 2, 8, 1) 100%);
+  }
+
+  /* Glassmorphism panel styles */
+  .glass-card {
+    background: rgba(10, 8, 16, 0.6);
+    backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(0, 240, 255, 0.15);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  }
+
+  .glass-card-magenta {
+    background: rgba(15, 5, 18, 0.65);
+    backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(255, 0, 171, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(255, 0, 171, 0.05);
+  }
+  
+  .neon-glow-cyan {
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.35);
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+  }
+
+  .neon-glow-magenta {
+    box-shadow: 0 0 15px rgba(255, 0, 171, 0.35);
+    text-shadow: 0 0 8px rgba(255, 0, 171, 0.6);
+  }
+
+  .hologram-scanline {
+    position: relative;
+    overflow: hidden;
+  }
+  .hologram-scanline::after {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    linear-gradient: rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%;
+    background: linear-gradient(
+      rgba(0, 240, 255, 0) 0%,
+      rgba(0, 240, 255, 0.03) 10%,
+      rgba(0, 240, 255, 0) 20%
+    );
+    background-size: 100% 30px;
+    z-index: 2;
+    pointer-events: none;
+    animation: scanline 8s linear infinite;
+  }
+}
+
+@keyframes scanline {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 100%;
+  }
+}
+
+@keyframes pulse-gold {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(1);
+    filter: drop-shadow(0 0 5px rgba(0, 240, 255, 0.2));
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.02);
+    filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.6));
+  }
+}
+
+@keyframes slow-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-pulse-gold {
+  animation: pulse-gold 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-slow-spin {
+  animation: slow-spin 45s linear infinite;
+}
+
+@keyframes sigil-draw {
+  from {
+    stroke-dashoffset: 1000;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes sigil-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes text-fade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-draw {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: sigil-draw 3.0s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.animate-pop {
+  transform-origin: 100px 100px;
+  opacity: 0;
+  animation: sigil-pop 0.6s cubic-bezier(0.34, 1.3, 0.64, 1) forwards;
+}
+
+.animate-text-fade {
+  animation: text-fade 1.5s ease-out forwards;
+}
+
+/* Custom 3D Tilt container setup */
+.tilt-card-container {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  transition: transform 0.15s ease-out;
+}
+
+@keyframes float-y {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1.5deg);
+  }
+}
+
+@keyframes holographic-pulse {
+  0%, 100% {
+    opacity: 0.25;
+    filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.4));
+  }
+  50% {
+    opacity: 0.45;
+    filter: drop-shadow(0 0 25px rgba(255, 0, 171, 0.7));
+  }
+}
+
+.animate-float-glyph {
+  animation: float-y 4s ease-in-out infinite;
+}
+
+/* 3D Glassmorphic Tarot flipping styles */
+.tarot-card-container {
+  perspective: 1200px;
+}
+.tarot-flipper {
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+.tarot-flipped {
+  transform: rotateY(180deg);
+}
+.tarot-front, .tarot-back {
+  backface-visibility: hidden;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.tarot-back {
+  transform: rotateY(180deg);
+}
+
+/* Emerald bronze gradient classes */
+.emerald-bronze-mesh {
+  background: radial-gradient(circle at 50% 10%, rgba(9, 39, 29, 0.85) 0%, rgba(5, 12, 10, 0.98) 50%, rgba(2, 4, 3, 1) 100%);
+}
+.bronze-glow-border {
+  border: 1px solid rgba(199, 143, 62, 0.25);
+}
+.bronze-glow-border:hover {
+  border: 1px solid rgba(199, 143, 62, 0.6);
+  box-shadow: 0 0 15px rgba(199, 143, 62, 0.2);
+}
+
