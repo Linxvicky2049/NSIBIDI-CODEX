@@ -12,7 +12,8 @@ import {
   Info, 
   ChevronRight, 
   BookOpen, 
-  HelpCircle 
+  HelpCircle,
+  Swords
 } from "lucide-react";
 
 // Web Audio synthesizer for mystic sound triggers
@@ -514,10 +515,10 @@ export const NsibidiOracleCalendar: React.FC = () => {
                 <div className="shrink-0 flex items-center gap-2 select-none">
                   {/* Decorative glowing miniature runes representing lot */}
                   <div className="h-12 w-12 rounded bg-emerald-500/5 border border-emerald-500/15 flex items-center justify-center relative">
-                    <span className="text-xl text-emerald-400 font-bold animate-pulse">⚔️</span>
+                    <Swords className="w-5 h-5 text-emerald-400 animate-pulse" />
                   </div>
                   <div className="h-12 w-12 rounded bg-emerald-500/5 border border-emerald-500/15 flex items-center justify-center relative">
-                    <span className="text-xl text-emerald-400 font-bold animate-pulse">🌀</span>
+                    <Compass className="w-5 h-5 text-emerald-400 animate-[spin_8s_linear_infinite]" />
                   </div>
                 </div>
               </>

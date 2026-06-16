@@ -8,7 +8,18 @@ import {
   AlertCircle, 
   Check, 
   Clock, 
-  Globe2 
+  Globe2,
+  Mail,
+  Phone,
+  MapPin,
+  User,
+  Share2,
+  Terminal,
+  Camera,
+  Cpu,
+  Compass,
+  Activity,
+  ArrowRight
 } from "lucide-react";
 import { GLYPHS } from "./glyphsData";
 import { SigilRenderer } from "./components/SigilRenderer";
@@ -361,6 +372,8 @@ export default function App() {
   const [currentLoadingLineIndex, setCurrentLoadingLineIndex] = useState(0);
   const [currentUtcTime, setCurrentUtcTime] = useState("");
   const [copied, setCopied] = useState(false);
+  const [shareStatus, setShareStatus] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"transliterator" | "camera" | "oracle" | "codex" | "creator">("transliterator");
   const [archive, setArchive] = useState<ArchiveItem[]>([]);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
   const [altarMode, setAltarMode] = useState<"vector" | "ai">("ai");
@@ -656,6 +669,112 @@ export default function App() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Web Share API with rich PNG conversion and multi-platform text/fallback support
+  const handleShare = async () => {
+    if (!result) return;
+    const textSummary = `NSIBIDI ALIGNMENT: ${activeName.toUpperCase()}\n\nTraditional Meaning: ${result.meaning}\n\nEssence: ${result.essence}\n\nExplore African logographic writing traditions using the sacred Nsibidi Codex Display. Configured by Okafor Victor (Blacksun).`;
+
+    setShareStatus("Preparing alignment data...");
+
+    try {
+      const svgEl = document.getElementById("sigilSvg");
+      if (svgEl && navigator.canShare && navigator.share) {
+        setShareStatus("Generating shareable vector frame...");
+        const serializer = new XMLSerializer();
+        const source = `<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="800" height="800" style="background:#05040a">
+  ${serializer.serializeToString(svgEl).replace(/<svg[^>]*>/, "").replace("</svg>", "")}
+</svg>`;
+
+        const svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+        const blobUrl = URL.createObjectURL(svgBlob);
+
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = async () => {
+          try {
+            const canvas = document.createElement("canvas");
+            canvas.width = 800;
+            canvas.height = 800;
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+              // High fidelity dark background
+              ctx.fillStyle = "#05040a";
+              ctx.fillRect(0, 0, canvas.width, canvas.height);
+              ctx.drawImage(img, 0, 0, 800, 800);
+
+              canvas.toBlob(async (pngBlob) => {
+                if (!pngBlob) {
+                  // Fallback to text + link
+                  await navigator.share({
+                    title: `Nsibidi Alignment — ${activeName.toUpperCase()}`,
+                    text: textSummary,
+                    url: window.location.href,
+                  });
+                  setShareStatus("Summary shared!");
+                  setTimeout(() => setShareStatus(null), 3000);
+                  return;
+                }
+
+                const file = new File([pngBlob], `nsibidi-shield-${activeName.toLowerCase()}.png`, { type: "image/png" });
+                const shareData = {
+                  title: `Nsibidi Alignment — ${activeName.toUpperCase()}`,
+                  text: textSummary,
+                  url: window.location.href,
+                  files: [file],
+                };
+
+                if (navigator.canShare(shareData)) {
+                  await navigator.share(shareData);
+                  setShareStatus("Sacred shield shared successfully!");
+                } else {
+                  await navigator.share({
+                    title: `Nsibidi Alignment — ${activeName.toUpperCase()}`,
+                    text: textSummary,
+                    url: window.location.href,
+                  });
+                  setShareStatus("Summary shared!");
+                }
+                setTimeout(() => setShareStatus(null), 3000);
+              }, "image/png");
+            }
+          } catch (err) {
+            console.error("Canvas raster failed:", err);
+            // Text fallback on capture error
+            await navigator.share({
+              title: `Nsibidi Alignment — ${activeName.toUpperCase()}`,
+              text: textSummary,
+              url: window.location.href,
+            });
+            setShareStatus("Alignment shared!");
+            setTimeout(() => setShareStatus(null), 3000);
+          } finally {
+            URL.revokeObjectURL(blobUrl);
+          }
+        };
+        img.src = blobUrl;
+      } else if (navigator.share) {
+        // Direct text sharing if file share canShare is false or SVG isn't found
+        await navigator.share({
+          title: `Nsibidi Alignment — ${activeName.toUpperCase()}`,
+          text: textSummary,
+          url: window.location.href,
+        });
+        setShareStatus("Details shared!");
+        setTimeout(() => setShareStatus(null), 3000);
+      } else {
+        // Desktop clipboard copy fallback
+        await navigator.clipboard.writeText(textSummary + "\n\nConnection URL: " + window.location.href);
+        setShareStatus("Copied to Clipboard!");
+        setTimeout(() => setShareStatus(null), 3000);
+      }
+    } catch (error) {
+      console.error("Sharing failed:", error);
+      setShareStatus("Share canceled");
+      setTimeout(() => setShareStatus(null), 2500);
+    }
+  };
+
   // Tactile click handler: scroll smoothly to highlighted dictionary cards
   const scrollToGlyph = (glyphId: string) => {
     setActiveCategory("All");
@@ -766,8 +885,49 @@ export default function App() {
           </div>
         </header>
 
-        {/* Main Immersive Split Workspace Container */}
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch mb-20">
+        {/* Interactive Cyber-Segmented Navigation Control Bar */}
+        <div className="flex flex-wrap justify-center lg:justify-start gap-3 mb-12 border-b border-cyber-blue/15 pb-8 relative z-20 select-none">
+          {[
+            { id: "transliterator", label: "Oracle Console", icon: Cpu },
+            { id: "camera", label: "AR Scope View", icon: Camera },
+            { id: "oracle", label: "Oracle Dynamics", icon: Compass },
+            { id: "codex", label: "Glyph Codex", icon: BookOpen },
+            { id: "creator", label: "Creator (Blacksun)", icon: User },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isSelected = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`px-5 py-3.5 text-[10px] uppercase font-mono tracking-[3px] font-bold rounded-lg flex items-center gap-2.5 border cursor-pointer transition-all duration-300 select-none active:scale-95
+                  ${
+                    isSelected
+                      ? "bg-cyber-blue text-black border-cyber-blue hover:bg-cyber-magenta hover:border-cyber-magenta hover:text-white shadow-[0_0_15px_rgba(0,240,255,0.35)]"
+                      : "border-cyber-blue/20 bg-black/40 hover:border-cyber-blue hover:text-cyber-blue text-ash"
+                  }`}
+              >
+                <Icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Dynamic Views Viewport utilizing AnimatePresence for cinematic cyber transitions */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="w-full relative z-10"
+          >
+            {activeTab === "transliterator" && (
+              <>
+                {/* Main Immersive Split Workspace Container */}
+                <section className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch mb-20">
           
           {/* Left Side: The Initiate/Translation Control Center */}
           <div className="lg:col-span-4 glass-card border border-cyber-blue/30 p-8 flex flex-col justify-between rounded-xl relative group hover:border-cyber-blue/60 transition-colors shadow-2xl overflow-hidden">
@@ -1034,15 +1194,41 @@ export default function App() {
 
           </div>
         </section>
+              </>
+            )}
 
-        {/* Dynamic 3D Real-World AR Camera Overlay Scope Mapping */}
-        <NsibidiArCamera currentSigilName={activeName} result={result} />
+            {activeTab === "camera" && (
+              <div className="space-y-4 mb-20 w-full animate-fade-in select-none">
+                <div className="border-b border-cyber-blue/25 pb-4 mb-6">
+                  <h2 className="font-display text-2xl font-black uppercase tracking-[3px] text-white flex items-center gap-2">
+                    <Camera className="w-6 h-6 text-cyber-blue" />
+                    AR SCOPE VIEW
+                  </h2>
+                  <p className="text-xs text-ash mt-1 leading-relaxed">
+                    Overlay and capture your custom generated {activeName.toUpperCase()} vector sigil onto your real-world environment feed.
+                  </p>
+                </div>
+                {result && <NsibidiArCamera currentSigilName={activeName} result={result} />}
+              </div>
+            )}
 
-        {/* Immersive Nsibidi 3D Divination Calendar, Horoscope & Tarot Spread Module */}
-        <NsibidiOracleCalendar />
+            {activeTab === "oracle" && (
+              <div className="space-y-4 mb-20 w-full select-none">
+                <div className="border-b border-[#c78f3e]/25 pb-4 mb-6">
+                  <h2 className="font-display text-2xl font-black uppercase tracking-[3px] text-white flex items-center gap-2">
+                    <Compass className="w-6 h-6 text-[#c78f3e]" />
+                    ORACLE DYNAMICS
+                  </h2>
+                  <p className="text-xs text-ash mt-1 leading-relaxed">
+                    Sync with Efik and Igbo lunar cycles, decode daily destiny lots, and flip traditional 3D Nsibidi tarot arche codes.
+                  </p>
+                </div>
+                <NsibidiOracleCalendar />
+              </div>
+            )}
 
-        {/* Big Glyph Codex Dictionary section */}
-        <section className="border-t border-cyber-blue/15 pt-16" id="codexListSection">
+            {activeTab === "codex" && (
+              <section className="pt-2 mb-20 w-full select-none animate-fade-in" id="codexListSection">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
             <div>
               <h2 className="font-display text-2xl font-black uppercase tracking-[3px] text-white">
@@ -1117,6 +1303,107 @@ export default function App() {
           )}
 
         </section>
+            )}
+
+            {activeTab === "creator" && (
+              <section className="glass-card border border-cyber-blue/20 p-8 rounded-xl relative overflow-hidden mb-10 select-none animate-fade-in text-left">
+                {/* Cyber scans backgrounds for Okafor page */}
+                <div className="absolute top-0 right-0 w-96 h-96 bg-cyber-blue/[0.015] blur-3xl pointer-events-none" />
+                
+                <h2 className="font-display text-2xl font-black uppercase tracking-[3px] text-white border-b border-cyber-blue/15 pb-4 mb-8 flex items-center gap-2">
+                  <User className="w-6 h-6 text-cyber-blue" />
+                  CREATOR PROFILE
+                </h2>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                  {/* Left Column: Creator Identity Showcase */}
+                  <div className="lg:col-span-4 flex flex-col items-center text-center p-6 border border-cyber-blue/15 bg-black/45 rounded-lg relative overflow-hidden">
+                    <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-cyber-blue to-cyber-magenta" />
+                    
+                    <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-cyber-blue/40 shadow-[0_0_15px_rgba(0,240,255,0.2)] mb-4">
+                      <img 
+                        src="/src/assets/images/logo_liquid_metal_1781607523361.jpg" 
+                        alt="Okafor Victor" 
+                        className="w-full h-full object-cover scale-105"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+
+                    <h3 className="font-mono text-lg font-black text-white tracking-widest uppercase">
+                      OKAFOR VICTOR
+                    </h3>
+                    <p className="font-mono text-[10px] text-cyber-magenta uppercase tracking-[4px] font-bold mt-1">
+                      Alias: Blacksun
+                    </p>
+
+                    <div className="my-5 w-full border-t border-cyber-blue/10 pt-4 space-y-3.5 text-left font-mono text-[10.5px]">
+                      <div className="flex items-center gap-2.5 text-ash">
+                        <MapPin className="w-3.5 h-3.5 text-cyber-blue shrink-0" />
+                        <span>Coordinates: Delta State, Nigeria</span>
+                      </div>
+                      <div className="flex items-start gap-2.5 text-ash">
+                        <Mail className="w-3.5 h-3.5 text-cyber-magenta shrink-0 mt-0.5" />
+                        <div className="break-all space-y-0.5">
+                          <p>Victor4all2015@gmail.com</p>
+                          <p>Blaksun8888@gmail.com</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2.5 text-ash">
+                        <Phone className="w-3.5 h-3.5 text-cyber-blue shrink-0" />
+                        <span>+234 812 291 1210</span>
+                      </div>
+                    </div>
+
+                    <a
+                      href="https://wa.me/2348122911210"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full bg-[#25d366]/10 hover:bg-[#25d366] text-white hover:text-black border border-[#25d366]/40 hover:border-[#25d366] py-3 text-[10px] uppercase font-mono tracking-widest font-bold transition-all duration-300 rounded-lg flex items-center justify-center gap-2 shadow-[0_0_12px_rgba(37,211,102,0.15)] hover:shadow-[0_0_20px_rgba(37,211,102,0.4)]"
+                    >
+                      <Phone className="w-4 h-4" />
+                      Connect on WhatsApp
+                    </a>
+                  </div>
+
+                  {/* Right Column: Creative Bio & Architectural Vibe */}
+                  <div className="lg:col-span-8 space-y-6 text-left">
+                    <div className="glass-card border border-cyber-blue/10 bg-[#07050f]/60 p-6 rounded-lg">
+                      <h4 className="font-mono text-xs uppercase tracking-[3px] text-cyber-blue font-bold mb-3">
+                        About Me
+                      </h4>
+                      <p className="font-sans text-xs text-ash leading-relaxed mb-4">
+                        I am <strong className="text-white">OKAFOR VICTOR</strong>, Alias <strong className="text-cyber-magenta font-mono">Blacksun</strong>, a creative visionary dedicated to blending ancient wisdom with futuristic design. My work explores the deep symbolism of Igbo Nsibidi knowledge, weaving it into modern digital experiences that feel both sacred and immersive.
+                      </p>
+                      <p className="font-sans text-xs text-ash leading-relaxed">
+                        From interactive divination calendars to holographic displays, every project I create is not just design, but a living oracle — a bridge between past and future. Tradition meets science in a synthesis of heritage and futuristic UI mechanics.
+                      </p>
+                    </div>
+
+                    <div className="glass-card border border-cyber-blue/15 bg-black/40 p-6 rounded-lg relative overflow-hidden">
+                      <h4 className="font-mono text-xs uppercase tracking-[3px] text-cyber-magenta font-bold mb-3">
+                        Creative Alignment
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="border border-cyber-blue/5 bg-black/30 p-4 rounded">
+                          <h5 className="font-mono text-[10px] text-white uppercase tracking-widest font-bold mb-1">IMMEDIATE INTUITION</h5>
+                          <p className="text-[10px] text-ash/90 leading-relaxed font-sans mt-1">
+                            Blending Efik, Ejagham, and Igbo logographic heritage with generative procedural web layouts.
+                          </p>
+                        </div>
+                        <div className="border border-cyber-blue/5 bg-black/30 p-4 rounded">
+                          <h5 className="font-mono text-[10px] text-white uppercase tracking-widest font-bold mb-1">FUTURE RETROFITTING</h5>
+                          <p className="text-[10px] text-ash/90 leading-relaxed font-sans mt-1">
+                            Deploying real-time WebGL, matrix shaders, and advanced cybernetic vector fields for cultural preservation.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+          </motion.div>
+        </AnimatePresence>
 
       </div>
 
